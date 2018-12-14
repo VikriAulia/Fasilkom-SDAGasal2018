@@ -1,0 +1,288 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+/**
+ *
+ * @author vikri
+ */
+
+/*  Class Node Linked List  */
+class Node {
+
+    protected int data;
+    protected Node link;
+
+    /*  Constructor  */
+    public Node() {
+        link = null;
+        data = 0;
+    }
+
+    /*  Constructor  */
+    public Node(int d, Node n) {
+        data = d;
+        link = n;
+    }
+
+    /*  fungsi setlink ke next node  */
+    public void setLink(Node n) {
+        link = n;
+    }
+
+    /*  fungsi set data current node  */
+    public void setData(int d) {
+        data = d;
+    }
+
+    /*  fungsi getlink ke next node  */
+    public Node getLink() {
+        return link;
+    }
+
+    /*  fungsi get data current node  */
+    public int getData() {
+        return data;
+    }
+}
+
+/* Class linkedList */
+class linkedList {
+
+    protected Node start;
+    protected Node end;
+    public int size;
+
+    /* Constructor */
+    public linkedList() {
+        start = null;
+        end = null;
+        size = 0;
+    }
+
+    /* Function to check if list is empty */
+    public boolean isEmpty() {
+        return start == null;
+    }
+
+    /* Function to get size of the list */
+    public int getSize() {
+        return size;
+    }
+
+    /* Function to insert element at the begining */
+    public void insertAtStart(int val) {
+        Node nptr = new Node(val, null);
+        nptr.setLink(start);
+        if (start == null) {
+            start = nptr;
+            nptr.setLink(start);
+            end = start;
+        } else {
+            end.setLink(nptr);
+            start = nptr;
+        }
+        size++;
+    }
+
+    /* Function to insert element at end */
+    public void insertAtEnd(int val) {
+        Node nptr = new Node(val, null);
+        nptr.setLink(start);
+        if (start == null) {
+            start = nptr;
+            nptr.setLink(start);
+            end = start;
+        } else {
+            end.setLink(nptr);
+            end = nptr;
+        }
+        size++;
+    }
+
+    /* Function to insert element at position */
+    public void insertAtPos(int val, int pos) {
+        Node nptr = new Node(val, null);
+        Node ptr = start;
+        pos = pos;
+        for (int i = 1; i < size; i++) {
+            if (i == pos) {
+                Node tmp = ptr.getLink();
+                ptr.setLink(nptr);
+                nptr.setLink(tmp);
+                break;
+            }
+            ptr = ptr.getLink();
+        }
+        size++;
+    }
+
+    /* Function to delete element at position */
+    public void deleteAtPos(int pos) {
+        if (size == 1 && pos == 1) {
+            start = null;
+            end = null;
+            size = 0;
+            return;
+        }
+        if (pos == 1) {
+            start = start.getLink();
+            end.setLink(start);
+            size--;
+            return;
+        }
+        if (pos == size) {
+            Node s = start;
+            Node t = start;
+            while (s != end) {
+                t = s;
+                s = s.getLink();
+            }
+            end = t;
+            end.setLink(start);
+            size--;
+            return;
+        }
+        Node ptr = start;
+        pos = pos - 1;
+        for (int i = 1; i < size - 1; i++) {
+            if (i == pos) {
+                Node tmp = ptr.getLink();
+                tmp = tmp.getLink();
+                ptr.setLink(tmp);
+                break;
+            }
+            ptr = ptr.getLink();
+        }
+        size--;
+    }
+
+    public int[] searchLoop() {
+        Node ptr = start;
+        int ukuranLoop = size;
+        int counter = 3;
+        int[] pos = new int[ukuranLoop + 1];
+        for (int i = 1; i <= ukuranLoop + 1; i++) {
+            Node klr = ptr.getLink();
+            Node klr2 = klr.getLink();
+            //counter = counter + 1;
+            if (ptr.getData() == klr.getData() && klr.getData() == klr2.getData()) {
+                pos[i - 1] = counter;
+            }
+            counter = counter + 1;
+            ptr = ptr.getLink();
+        }
+        return pos;
+    }
+
+    /* Function to display contents */
+    public void display() {
+        System.out.print("\nCircular Singly Linked List = ");
+        Node ptr = start;
+        if (size == 0) {
+            System.out.print("empty\n");
+            return;
+        }
+        if (start.getLink() == start) {
+            System.out.print(start.getData() + "->" + ptr.getData() + "\n");
+            return;
+        }
+        System.out.print(start.getData() + "->");
+        ptr = start.getLink();
+        while (ptr.getLink() != start) {
+            System.out.print(ptr.getData() + "->");
+            ptr = ptr.getLink();
+        }
+        System.out.print(ptr.getData() + "->");
+        ptr = ptr.getLink();
+        System.out.print(ptr.getData() + "\n");
+        System.out.println("Start " + start.getData() + " Next " + start.getLink());
+        System.out.println("End " + end.getData() + " Next " + end.getLink());
+
+    }
+
+}
+
+public class SDA18192T {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) throws IOException {
+        // deklarasi variabel
+        linkedList list = new linkedList();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        //mengambil input
+        String line[] = br.readLine().split(" ");
+        int N = Integer.parseInt(line[0]); //Banyak kelereng Awal
+        int M = Integer.parseInt(line[1]);//Banyak kereleng maksimal
+        String line1[] = br.readLine().split(" ");//mengambil kelerang awal
+        for (int i = 0; i < N; i++) {//add kelereng ke linkedlist insertAtEnd
+            list.insertAtEnd(Integer.parseInt(line1[i]));
+
+        }
+//        list.display();//display
+        deleteLoop(list);//cek loop awal
+//        list.display();//display
+        String line2 = br.readLine();//ambil event
+        int Event = Integer.parseInt(line2);
+        for (int i = 1; i <= Event; i++) {//loop event
+            String line3[] = br.readLine().split(" ");
+            int P = Integer.parseInt(line3[0]);//ambil posisi
+            int W = Integer.parseInt(line3[1]);//ambil warna kelereng
+            if (list.getSize() > M) {//jika ukuran list lebih dari M system mencetak Kalahh
+                System.out.println("KALAH");
+                break;
+            } else if (P == list.getSize()) {
+                list.insertAtEnd(W);
+            } else if (P < 1) {//jika posisi 1 maka insert at start
+                list.insertAtStart(W);
+            } else {
+                list.insertAtPos(W, P);
+            }
+//            list.display();//display
+            deleteLoop(list);//cek loop tiap input
+//            list.display();
+        }
+        if (list.getSize() < 4) {
+            System.out.print("MENANG");
+        } else if (list.getSize() <= M) {
+            System.out.print(list.getSize());
+        }
+
+    }
+
+    public static void deleteLoop(linkedList list) {
+        int[] loop = list.searchLoop();
+        int depan = 0;
+        for (int i = loop.length - 1; i >= 0; i--) {
+            if (loop[i] != 0) {
+                if (loop[i] > list.getSize()) {
+                    depan = loop[i] - list.getSize();
+                    if (depan == 2) {//jika ditemukan 2 klereng dari ekor
+                        list.deleteAtPos(list.getSize());
+                        list.deleteAtPos(2);
+                        list.deleteAtPos(1);
+                    } else if (depan == 1) {// jika ditemukan 1 kelereng dari ekor
+                        list.deleteAtPos(list.getSize());
+                        list.deleteAtPos(list.getSize() - 1);
+                        list.deleteAtPos(1);
+                    }
+                }
+                list.deleteAtPos(loop[i]);
+                list.deleteAtPos(loop[i] - 1);
+                list.deleteAtPos(loop[i] - 2);
+            }
+//            System.out.print(loop[i] + " ");
+        }
+    }
+
+}

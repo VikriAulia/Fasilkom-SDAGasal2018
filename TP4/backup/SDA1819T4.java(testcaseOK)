@@ -1,0 +1,303 @@
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.io.IOException;
+
+/**
+ * 
+ */
+
+/**
+ * @author vikri
+ *
+ */
+
+//node untuk rantai hash 
+class HashNode<K, V> {
+
+	@Override
+	public int hashCode() { 
+		//fungsi ini menggantikan fungsi hashCode yang disediakan java
+		// jadi tecnicaly saya tidak menggunakan Hash yang disediakan java
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + kemunculan;
+		result = prime * result + ((key == null) ? 0 : key.hashCode());
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		HashNode other = (HashNode) obj;
+		if (kemunculan != other.kemunculan)
+			return false;
+		if (key == null) {
+			if (other.key != null)
+				return false;
+		} else if (!key.equals(other.key))
+			return false;
+		return true;
+	}
+
+	K key;
+	V pola;
+	int kemunculan;
+
+	// Referensi ke node berikutnya
+	HashNode<K, V> next;
+
+	// Constructor
+	public HashNode(K key, V pola, int kemunculan) {
+		this.key = key;
+		this.pola = pola;
+		this.kemunculan = kemunculan;
+	}
+}
+
+public class SDA1819T4<K, V> {
+
+	private static Scanner sc;
+
+	/**
+	 * @param args
+	 */
+	// bucketArray is used to store array of chains
+	private ArrayList<HashNode<K, V>> bucketArray;
+
+	// Current capacity of array list
+	private int numBuckets;
+
+	// Current size of array list
+	private int size;
+
+	// Constructor (Initializes capacity, size and
+	// empty chains.
+	public SDA1819T4() {
+		bucketArray = new ArrayList<>();
+		numBuckets = 10;
+		size = 0;
+
+		// Create empty chains
+		for (int i = 0; i < numBuckets; i++)
+			bucketArray.add(null);
+	}
+
+	public int size() {
+		return size;
+	}
+
+	public boolean isEmpty() {
+		return size() == 0;
+	}
+
+	// This implements hash function to find index
+	// for a key
+	private int getBucketIndex(K key) {
+		int hashCode = key.hashCode();
+		int index = hashCode % numBuckets;
+		return index;
+	}
+
+	// Method to remove a given key
+	public void remove(K key) {
+		// Apply hash function to find index for given key
+		int bucketIndex = getBucketIndex(key);
+
+		// Get head of chain
+		HashNode<K, V> head = bucketArray.get(bucketIndex);
+
+		// Search for key in its chain
+		HashNode<K, V> prev = null;
+		while (head != null) {
+			// If Key found
+			if (head.key.equals(key))
+				break;
+
+			// Else keep moving in chain
+			prev = head;
+			head = head.next;
+		}
+
+		// If key was not there
+		if (head == null)
+			return;
+
+		// Reduce size
+		size--;
+
+		// Remove key
+		if (prev != null)
+			prev.next = head.next;
+		else
+			bucketArray.set(bucketIndex, head.next);
+
+//		return head.value;
+		System.out.println(head.pola+" "+head.kemunculan);
+	}
+
+	// Returns value for a key
+	public V get(K key) {
+		// Find head of chain for given key
+		int bucketIndex = getBucketIndex(key);
+		HashNode<K, V> head = bucketArray.get(bucketIndex);
+
+		// Search key in chain
+		while (head != null) {
+			if (head.key.equals(key))
+				return head.pola;
+			head = head.next;
+		}
+
+		// If key not found
+		return null;
+	}
+
+	// Adds a key value pair to hash
+	public boolean add(K key, V value, int C) {
+		// Find head of chain for given key
+		int bucketIndex = getBucketIndex(key);
+		HashNode<K, V> head = bucketArray.get(bucketIndex);
+
+		// Check if key is already present
+		while (head != null) {
+			if (head.key.equals(key)) {
+
+				if(head.kemunculan < C) {//jika kemunculan yang baru lebih tinggi maka ganti posisi
+					head.pola = value;
+					head.kemunculan = C;
+					return true;
+				}
+				
+				return false;
+			}
+			head = head.next;
+		}
+		
+		// Insert key in chain
+		size++;
+		head = bucketArray.get(bucketIndex);
+		HashNode<K, V> newNode = new HashNode<K, V>(key, value, C);
+		newNode.next = head; 
+		bucketArray.set(bucketIndex, newNode);
+
+		// If load factor goes beyond threshold, then
+		// double hash table size
+		if ((1.0 * size) / numBuckets >= 0.7) {
+			ArrayList<HashNode<K, V>> temp = bucketArray;
+			bucketArray = new ArrayList<>();
+			numBuckets = 2 * numBuckets;
+			size = 0;
+			for (int i = 0; i < numBuckets; i++)
+				bucketArray.add(null);
+
+			for (HashNode<K, V> headNode : temp) {
+				while (headNode != null) {
+					add(headNode.key, headNode.pola, C);
+					headNode = headNode.next;
+				}
+			}
+		}
+		return true;
+	}
+
+	int cariKemunculan(String pola, String kalimat) {
+		//https://www.javacodeexamples.com/java-count-occurrences-of-substring-in-string-example/724
+		int hasil = 0, index =0;
+		
+		while ((index = kalimat.indexOf(pola, index)) != -1) {
+			hasil++;
+			index++;
+		}
+		
+		return hasil;
+	}
+	
+
+	void hitungLPSArray(String pola, int pPola, int lps[]) {
+		// panjang dari awalan dan akhiran sebelumnya
+		int panjang = 0;
+		int i = 1;
+		lps[0] = 0; // lps[0] selalu 0
+
+		// loop menghitung lps[i] untuk i = 1 ke M-1
+		while (i < pPola) {
+			if (pola.charAt(i) == pola.charAt(panjang)) {
+				panjang++;
+				lps[i] = panjang;
+				i++;
+			} else // (kalimat[i] != kalimat[panjang])
+			{
+				// This is tricky. Consider the example.
+				// AAACAAAA and i = 7. The idea is similar
+				// to search step.
+				if (panjang != 0) {
+					panjang = lps[panjang - 1];
+
+					// Also, note that we do not increment
+					// i here
+				} else // if (len == 0)
+				{
+					lps[i] = panjang;
+					i++;
+				}
+			}
+		}
+	}
+
+	// fungsi mencari substring dari kalimat
+	// https://www.geeksforgeeks.org/program-print-substrings-given-string/
+	public void cariSubstring(String kalimat, int n) {
+		for (int i = 0; i < n; i++)
+			for (int j = i + 1; j <= n; j++) {
+
+				String substring = kalimat.substring(i, j);
+
+			}
+
+	}
+
+	public static void main(String[] args) throws IOException {
+		SDA1819T4<Integer, String> TP4 = new SDA1819T4<>();
+		sc = new Scanner(System.in);
+		String S = sc.nextLine(); // mengambil String
+		int Q = Integer.parseInt(sc.nextLine()); // ambil jumlah inputan
+
+		for (int i = 0; i < Q; i++) {
+			String line = sc.nextLine();
+			String[] tokens = line.split("\\s");
+			int tipe = Integer.parseInt(tokens[0]);
+
+			if (tipe == 0) {// action type 0
+				String pola = tokens[1];
+				int hasil = TP4.cariKemunculan(pola, S);
+				System.out.println(hasil);
+			} else if (tipe == 1) {
+//				TP4.cariSubstring(S, S.length());
+				String kalimat = S;
+				int n = S.length();
+				for (int k = 0; k < n; k++) {
+					for (int j = k + 1; j <= n; j++) {
+						String substring = kalimat.substring(k, j); //berisi substring dengan index awal i dan akhir j
+						int key = substring.length(); //panjang dari
+						int kemunculan = TP4.cariKemunculan(substring, kalimat); //hitung kemunculan
+						TP4.add(key, substring, kemunculan); //isi data ke hashtable
+					}
+				}
+				int l = 1; //ini dalah key
+				int size = TP4.size(); //ini ukuran hashtable
+				while (!TP4.isEmpty()&& l <=size) {
+					TP4.remove(l); 
+					l++; //tambah key
+				}
+			}
+
+		}
+	}
+
+}

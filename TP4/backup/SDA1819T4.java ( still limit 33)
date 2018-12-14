@@ -1,0 +1,251 @@
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.io.IOException;
+
+/**
+ * 
+ */
+
+/**
+ * @author vikri.aulia
+ * @author NPM 1706124182
+ */
+
+//node untuk rantai hash 
+//hashtable ini menggunakan teknik open hasing dengan menggunakan arraylist untuk menampung data
+//referensi code https://www.geeksforgeeks.org/implementing-our-own-hash-table-with-separate-chaining-in-java/
+class HashNode<K, V> {
+
+	@Override
+	public int hashCode() { 
+		//fungsi ini menggantikan fungsi hashCode yang disediakan java
+		// jadi tecnicaly saya tidak menggunakan Hash yang disediakan java
+		final int prima = 31;
+		int hasil = 1;
+		hasil = prima * hasil + kemunculan;
+		hasil = prima * hasil + ((key == null) ? 0 : key.hashCode());
+		return hasil;
+	}
+
+	K key;
+	V pola;
+	int kemunculan;
+
+	// Referensi ke node berikutnya
+	HashNode<K, V> next;
+
+	// Constructor
+	public HashNode(K key, V pola, int kemunculan) {
+		this.key = key;
+		this.pola = pola;
+		this.kemunculan = kemunculan;
+	}
+}
+
+public class SDA1819T4<K, V> {
+
+	private static Scanner sc;
+
+	/**
+	 * @param args
+	 */
+	// tampungArray di gunakan untuk menyimpan array rantai data
+	private ArrayList<HashNode<K, V>> bucketArray;
+
+	// kapasitas arraylist saat ini
+	private int numBuckets;
+
+	// ukuran dari array list
+	private int size;
+
+
+	// Constructo ( inisialisasi kapasitas, ukuran dan 
+	// rantai yg kosong
+	public SDA1819T4() {
+		bucketArray = new ArrayList<>();
+		numBuckets = 10;
+		size = 0;
+
+		// membuat rantai data kosong
+		for (int i = 0; i < numBuckets; i++)
+			bucketArray.add(null);
+	}
+
+	public int size() {
+		return size;
+	}
+
+	public boolean isEmpty() {
+		return size() == 0;
+	}
+
+	// fungsi ini menggunakan fungsi HashCode yang sudah di overide
+	// untuk mendapatkan index dari sebuah key
+	private int getBucketIndex(K key) {
+		int hashCode = key.hashCode();
+		int index = hashCode % numBuckets;
+		return index;
+	}
+
+	// method untuk mengeluarkan data sesuai key yang di berikan
+	public void remove(K key) {
+
+		// jalankan fungsi untuk mendapatkan index dari key
+		int bucketIndex = getBucketIndex(key);
+
+		// ambil head dari hashtable
+		HashNode<K, V> head = bucketArray.get(bucketIndex);
+
+		// cari key dalam hashtable
+		HashNode<K, V> prev = null;
+		while (head != null) {
+			// jika key ketemu
+			if (head.key.equals(key))
+				break;
+
+			// jika tidak ketemu jalan terus dalam loop while
+			prev = head;
+			head = head.next;
+		}
+
+		// jika keynya tidak ada dalam hashtable
+		if (head == null)
+			return;
+
+		// kurangi ukuran hashtable
+		size--;
+
+		// hapus key
+		if (prev != null)
+			prev.next = head.next;
+		else
+			bucketArray.set(bucketIndex, head.next);
+
+//		print isi data berupa pola dan kemunculan
+		System.out.println(head.pola+" "+head.kemunculan);
+	}
+
+	// method untuk mengembalikan isi dari sebuah key 
+	// yg berupa substring dari kalimat
+	public V get(K key) {
+		
+		// cari head dari key 
+		int bucketIndex = getBucketIndex(key);
+		HashNode<K, V> head = bucketArray.get(bucketIndex);
+
+		// cari key dalam chain data
+		while (head != null) {
+			if (head.key.equals(key))
+				return head.pola;
+			head = head.next;
+		}
+
+		// jika tidak ketemu
+		return null;
+	}
+
+	// fungsi add data kedalam hashtable, kombinasi pasangan key dengan value
+	public boolean add(K key, V value, int C) {
+		
+		int bucketIndex = getBucketIndex(key);
+		HashNode<K, V> head = bucketArray.get(bucketIndex);
+
+		// Cek apakah key sudah ada
+		while (head != null) {
+			if (head.key.equals(key)) {//jika sama
+				//cek jumlah kemunculan dari substring yang baru
+				if(head.kemunculan < C) {//jika kemunculan yang baru lebih tinggi maka ganti posisi
+					head.pola = value;
+					head.kemunculan = C;
+					return true;
+				}
+				
+				return false;
+			}
+			head = head.next;
+		}
+		
+		// jika belum ada, masukkan data ke hashtable
+		size++;
+		head = bucketArray.get(bucketIndex);
+		HashNode<K, V> newNode = new HashNode<K, V>(key, value, C);
+		newNode.next = head; 
+		bucketArray.set(bucketIndex, newNode);
+
+
+		// jika load factor melebihi treshold, maka ukuran hastable di double
+		if ((1.0 * size) / numBuckets >= 0.7) {
+			ArrayList<HashNode<K, V>> temp = bucketArray;
+			bucketArray = new ArrayList<>();
+			numBuckets = 2 * numBuckets;
+			size = 0;
+			for (int i = 0; i < numBuckets; i++)
+				bucketArray.add(null);
+
+			for (HashNode<K, V> headNode : temp) {
+				while (headNode != null) {
+					add(headNode.key, headNode.pola, C);
+					headNode = headNode.next;
+				}
+			}
+		}
+		return true;
+	}
+
+	int cariKemunculan(String pola, String kalimat) {
+		// Referensi https://www.javacodeexamples.com/java-count-occurrences-of-substring-in-string-example/724
+		int hasil = 0, index =0;
+		
+//		while ((index = kalimat.indexOf(pola, index)) != -1) {
+//			// menggunakan method indexOf untuk mencari ada tidaknya 
+//			//substring/pola dalam sebuah kalimat, method ini akan 
+//			// mengembalikan nilai -1 jika pola tidak ditemukan
+//			hasil++; //jika pola ketemu hasil di tambah
+//			index++; //geser index awal pencocokan
+//		}
+		hasil = ( kalimat.split(pola, -1).length ) - 1;
+		
+		return hasil;
+	}
+	
+
+	public static void main(String[] args) throws IOException {
+		SDA1819T4<Integer, String> TP4 = new SDA1819T4<>();
+		sc = new Scanner(System.in);
+		String S = sc.nextLine(); // mengambil String
+		int Q = Integer.parseInt(sc.nextLine()); // ambil jumlah inputan
+
+		for (int i = 0; i < Q; i++) {
+			String line = sc.nextLine();
+			String[] tokens = line.split("\\s");
+			int tipe = Integer.parseInt(tokens[0]);
+
+			if (tipe == 0) {// action type 0
+				String pola = tokens[1];
+				int hasil = TP4.cariKemunculan(pola, S);
+				System.out.println(hasil);
+			} else if (tipe == 1) { //action tipe 1
+				String kalimat = S;
+				int n = S.length(); //panjang dari string
+				for (int k = 0; k < n; k++) {
+					for (int j = k + 1; j <= n; j++) {
+						String substring = kalimat.substring(k, j); //berisi substring dengan index awal i dan akhir j
+						//menggunakan java substring method
+						int key = substring.length(); //panjang dari substring jadi key
+						int kemunculan = TP4.cariKemunculan(substring, kalimat); //hitung kemunculan
+						TP4.add(key, substring, kemunculan); //isi data ke hashtable
+					}
+				}
+				//print isi chain hashtable
+				int l = 1; //ini dalah key
+				int size = TP4.size(); //ini ukuran hashtable
+				while (!TP4.isEmpty()&& l <=size) {
+					TP4.remove(l); //method remove berisi perintah print
+					l++; //tambah key
+				}
+			}
+
+		}
+	}
+
+}

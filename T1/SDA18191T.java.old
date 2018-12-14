@@ -1,0 +1,78 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.ArrayList;
+/**
+ *
+ * @author vikri
+ */
+public class SDA18191T {
+
+    /**
+     * @param args the command line arguments
+     */
+    
+    
+    public static void main(String[] args) throws IOException{
+        //deklarasi faribel
+        String A = "A";
+        String B = "B";
+        
+        //memulai ambil input
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line[] = br.readLine().split(" ");
+        int S = Integer.parseInt(line[0]); //jarak milea dan dilan
+        int N = Integer.parseInt(line[1]);//jumlah transportasi
+        int U = Integer.parseInt(line[2]);//permindahan milea
+        String line1[] = br.readLine().split(" ");
+        int V[] = new int[line1.length];
+        for(int i = 0; i<line1.length; i++)//inpur transportasi dilan
+            V[i] = Integer.parseInt(line1[i]);
+        String P = br.readLine();
+        if(P.equals(A)){
+        List<Integer> list= new ArrayList<Integer>();
+        System.out.println(banyak_Cara(S,V,U, list,V[0]));
+        }else if (P.equals(B)){
+            
+        }
+    }
+        public static int banyak_Cara(int s,int Kendaraan[],int m, List<Integer> list,int kecPertama){
+         //posisi dilan
+        //List<Integer> list= new ArrayList<Integer>();
+        if (s==0)//n adalah jarak dilan dengan milea. jika 0 maka mereka bertemu
+        {
+            for (int i=0; i< list.size();i++){
+                System.out.print(list.get(i));
+                System.out.print(" ");
+    }
+            return 1;
+        }
+            if (s < 0)//dilan terlalu cepat
+            return 0;
+        
+            int temu = 0;
+            
+            for(int kendara=0;kendara<Kendaraan.length;kendara++){
+                //s = s-Kendaraan[kendara]-m;
+                //list.add(Kendaraan[kendara]);
+                
+                temu += banyak_Cara(s-Kendaraan[kendara]-m,Kendaraan,m,list,kendara);
+            }
+        return temu;
+        }
+    
+        public void cara_Tercepat(int n,int Kendaraan[],int m){
+            
+        }
+        
+        public void banyakCara2 (int PosM, int PosD, int N, int Kom1[], int Kom2[], int ii, int uu){
+            
+        }
+}
